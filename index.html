@@ -6,7 +6,8 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
-	<body style="background-color: black">
+	<body>
+		<div id="info"></div>
 		<script src="scoreoutputer.min.js"></script>
 		<script>
 			var so = new ScoreOutputer("110598080");
@@ -21,17 +22,18 @@
 				//產生自評表，參數如下所示
 				so.renderModal(
 					document.body,
-					'rgba(159,80,0,1)', 
+					'rgba(163,148,128,1)', 
 					'white', 
 					'14pt', 
 					'15px', 
-					'自我評分表 (助教測試用)'
+					dialogTitle = '自我評分表 (助教測試用)'
 				);
 				//設定下載按鈕 <-- 一定要呼叫這個函數，不然沒有下載功能
 				so.installDownloadBtn();
 				//產生 "開啟自評表按鈕"
 				so.renderBtn(
-					document.body,
+					// document.body,
+					document.querySelector("#info"),
 					"開啟自評表"
 				);
 			});
@@ -39,9 +41,7 @@
 		<script type="module">
 
 			import * as THREE from './three.module.js';
-
 			import { TTFLoader } from './TTFLoader.js';
-
 			import { PLYLoader } from './PLYLoader.js';
 
 			var fontttf = "./MoeLI.ttf";
@@ -53,10 +53,12 @@
 			let group, material;
 			let firstLetter = true;
 			let hour_group, min_group, sec_group, text_group, ply_group;
+			let group3d;
 			let textsMesh = [];
 			let textsGeo = [];
 			let textsMesh1;
 			let courseTitle;
+			let ply_mode = 1;
 
 			let texts = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 			const height = 1,
@@ -67,12 +69,8 @@
 				bevelSize = 1;
 
 			let titles = '高等計算機圖學作業';
-			const height1 = 1,
-				size1 = 25,
-				hover1 = 1,
-				curveSegments1 = 4,
-				bevelThickness1 = 2,
-				bevelSize1 = 1;
+			const size1 = 25,
+				hover1 = 1
 
 			let font = null;
 			let targetRotation = 0;
@@ -92,7 +90,6 @@
 				// CAMERA
 				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 1500 );
 				camera.position.set( 0, 350, 700 );
-
 				cameraTarget = new THREE.Vector3( 0, 80, 100);
 
 				// SCENE
@@ -115,11 +112,22 @@
 				group = new THREE.Group();
 				group.position.y = 100;
 
+				//test
+				// group3d = new THREE.Group();
+				// group.add( group3d );
+				// const geometry3d = new THREE.CircleGeometry( 10, 80 );
+				// const material3d = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+				// const circle3d = new THREE.Mesh( geometry3d, material3d );
+				// circle3d.position.set(100, 56, 0);
+				// circle3d.userData.mousemove = true;
+				// group3d.add( circle3d );
+				// group3d.userData = { URL: "https://threejs.org" };
+
 				//Circle
 				const circle_geometry = new THREE.CylinderGeometry( 90, 90, 3, 80 );
 				const circle_material = new THREE.MeshBasicMaterial( { color: 0xACD6FF, opacity: 0.6, transparent: true } );
 				const circle = new THREE.Mesh( circle_geometry, circle_material );
-				circle.rotation.set(-Math.PI/2, 0, 0);
+				circle.rotation.set(- Math.PI/2, 0, 0);
 				group.add( circle );
 				circle.userData.mousemove = false;
 
@@ -191,7 +199,8 @@
 					const ply_material = new THREE.MeshStandardMaterial( { color: 0xFFA042} );
 					const ply_mesh = new THREE.Mesh( geometry, ply_material );
 
-					ply_mesh.position.set(0, -80.5, 225)
+					//ply_mesh.position.set(0, -80.5, 225)
+					ply_mesh.position.set(0, -80.5, 0)
 					ply_mesh.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
 					ply_mesh.scale.multiplyScalar( 250 );
 
@@ -229,14 +238,16 @@
 			const mouse = new THREE.Vector2();
 			var mousemove = THREE.Object3D;
 
-			window.addEventListener( 'mousemove', event => {
+			window.addEventListener( 'click', event => {
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 			 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 			 	raycaster.setFromCamera( mouse, camera );
-			 	const intersects = raycaster.intersectObjects( text_group.children );
+			 	const intersects = raycaster.intersectObjects( group3d.children );
 			 	if ( intersects.length > 0 && intersects[0].object.userData.mousemove ) {
 			 		// mousemove = intersects[0].object.material.color.set ( 0xff0000 );
 			 		// mouse.cursor = pointer;
+			 		window.open(intersects[0].object.userData.URL);
+			 		// intersects[0].object.userData = { URL: "https://threejs.org" };
 			 	}
 			 	// else {
 			 	// 	mousemove = intersects[0].object.material.color.set ( 0xffffff );
@@ -286,7 +297,7 @@
 					textsMesh[i].position.set(Math.sin((2 * Math.PI) / 12 * i) * 73 - 13 , Math.cos((2 * Math.PI) / 12 * i) * 73 - 8 , 3);
 
 					text_group.add( textsMesh[i] );
-					textsMesh[i].userData.mousemove = true;
+					// textsMesh[i].userData.mousemove = true;
 				}
 			}
 
@@ -296,11 +307,11 @@
 						font: font,
 
 						size: size1,
-						height: height1,
-						curveSegments: curveSegments1,
+						height: height,
+						curveSegments: curveSegments,
 
-						bevelThickness: bevelThickness1,
-						bevelSize: bevelSize1,
+						bevelThickness: bevelThickness,
+						bevelSize: bevelSize,
 						bevelEnabled: true
 					} );
 
@@ -347,17 +358,42 @@
 				sec_group.rotation.z = (-2 * Math.PI) / 60 * time.getSeconds();
 
 				//PLYmodel move
-				if (time.getSeconds() >= 0 && time.getSeconds() <= 30)
-					ply_group.position.x += 0.1;
-				else
-					ply_group.position.x -= 0.1;
+				// if (time.getSeconds() >= 0 && time.getSeconds() <= 30)
+				// 	ply_group.position.x += 0.1;
+				// else ply_group.position.x -= 0.1;
+
+				if ( ply_mode == 1 ) {
+					ply_group.position.x += 0.5;
+					ply_group.position.z += 0.7;
+				}else if ( ply_mode == 2 ) {
+					ply_group.position.x -= 0.5;
+					ply_group.position.z += 0.7;
+				}else if ( ply_mode == 3 ) {
+					ply_group.position.x -= 0.5;
+					ply_group.position.z -= 0.7;
+				}else if ( ply_mode == 4 ) {
+					ply_group.position.x += 0.5;
+					ply_group.position.z -= 0.7;
+				}
+
+				if ( ply_group.position.x >= 220 )
+					if ( ply_mode == 1 ) ply_mode = 2;
+					else ply_mode = 3;
+				if ( ply_group.position.x <= -232 )
+					if ( ply_mode == 3 ) ply_mode = 4;
+					else ply_mode = 1;
+				if ( ply_group.position.z >= 240 )
+					if ( ply_mode == 2 ) ply_mode = 3;
+					else ply_mode = 4;
+				if ( ply_group.position.z <= -233 )
+					if ( ply_mode == 4 ) ply_mode = 1;
+					else ply_mode = 2;
 
 				camera.lookAt( cameraTarget );
 
 				renderer.render( scene, camera );
-
 			}
-
 		</script>
+		<!-- <div id="info"><a href="https://threejs.org" target="_blank" style="color:white; position: relative; left:100px;">group3d</a></div> -->
 	</body>
 </html>
